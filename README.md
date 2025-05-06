@@ -45,6 +45,11 @@ make sure you are in ros2 workspace.
 2. Currently, the start and goal are deterministically set and can be modified in `main.get_start_goal`
 
 
+
+https://github.com/user-attachments/assets/f546e0e0-457c-4443-befe-497f6370a613
+
+
+
 # Steps to run the simulation in ROS2
 After building the package, run the following launch files
 1. run `ros2 launch mppi_planner mppi_planner.launch.py`  
@@ -76,6 +81,12 @@ note: It may happen that launching Gazebo for the first time fails or some eleme
 #### Note:
 1. Obstacles, goal positions are hard coded in  `mppi_planner/config/sim_config.yaml`
 2. MPPI is aware of the all the static obstacles
+
+
+
+https://github.com/user-attachments/assets/8f08e8bb-debb-4088-8320-08d60748fde6
+
+
 
 ## TO DO:
 - [] Add Unit Test Cases
