@@ -1,9 +1,30 @@
-# MPPI Reach And Avoid Simulation
+# MPPI-Based Reach-Avoid Simulation in Python and ROS2
 
-- The following setup has been tested on a system with Ryzen 7 CPU, NVIDIA RTX 3050 GPU, and Ubuntu 22.04 OS.
-- The planning algorithm can run upto 20hz.
-- Used JAX for batch (`vmap`) and `jit` compatibility.
-- Simulation Video in `non_ros/example_video` and `mppi_planner/example_video`
+This repository provides a simulation framework for Model Predictive Path Integral (MPPI) control in a reach-avoid setting using both Matplotlib-based Python simulation and ROS2 with Gazebo integration. The simulation showcases real-time obstacle avoidance and goal-directed planning, leveraging JAX for highly efficient batch computation via vmap and jit
+
+## Highlights: 
+- Python-based simulation with Matplotlib for easy visualization and debugging
+
+- ROS2 and Gazebo support for realistic robotic simulations with TurtleBot3
+
+- GPU-accelerated planning (via JAX ), runs up to 20 Hz
+
+- Modular design with configurable parameters via YAML
+
+- Dockerized setup for consistent environments
+
+## System Requirements:
+
+- Tested on Ubuntu 22.04 with Ryzen 7 and RTX 3050
+
+- CUDA-enabled GPU recommended; CPU-only mode supported (See notes at the end of the readme)
+
+## Demo Videos:
+
+`non_ros/example_video/`: Matplotlib-based simulation
+
+`mppi_planner/example_video/`: ROS2 + Gazebo simulation
+
 # Setup:
 Assumes Cuda compatible hardware (check notes, if needs to run in cpu only)
 ## Docker Image Installation 
