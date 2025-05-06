@@ -1,0 +1,38 @@
+# @@ use jax.generator for reproducibility
+seed: 223           # PRNG seed #can use : 223, 7 obs in b/w , 1 : free
+num_obs: 50        #number of obstacle to spawn
+num_obs: 50         # number of obstacles to spawn
+
+robot_r: 0.2        # robot radius
+dim_st: 2           # state dimension (x, y)
+dim_ctrl: 2         # control dimension (v, ω)
+
+pose_lim:
+  - [-4, -4]        # [x_min, x_max]
+  - [ 4,  4]        # [y_min, y_max]
+
+noise_std_dev: 0.05 # per‐step noise standard deviation
+
+horizon_length: 10      # planning horizon
+mppi_num_rollouts: 100  # number of sampled rollouts
+
+knot_scale: 2       # down‐sampling factor for control knots
+degree: 3           # spline degree for control interpolation
+
+beta: 7             # MPPI temperature
+beta_u_bound: 10    # upper bound on β 
+beta_l_bound: 5     # lower bound on β
+param_exploration: 0.2
+update_beta: true   # whether to adapt β online
+
+sampling_type: gaussian_halton
+
+goal_tolerance: 0.1
+obs_buffer: 0.05    # extra clearance around obstacles
+
+collision_cost_weight: 20 # cost for collision
+stage_goal_cost_weight: 5  # stage cost for the goal
+state_limit_cost_weight: 100  # stage cost  for state-space violation
+terminal_goal_cost_weight: 10 #terminal cost for the goal
+
+

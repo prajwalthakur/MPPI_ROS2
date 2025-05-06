@@ -1,0 +1,57 @@
+# config.yaml
+# @@ use jax.generator for reproducibility
+seed: 223 #113   use: 223, 7 obs in b/w , 1 : free
+goal: [+1,3,0.0]
+dt:   0.1               # 1/planning-rate
+robot_r: 0.23            # robot radius [m]
+dim_st: 3               # state dimension
+dim_ctrl: 2             # control dimension
+obs_r: 0.20             
+obs_buffer: 0.06       # extra clearance around obstacles
+obs_h: 0.5
+goal_tolerance: 0.1   # teminate if the robot is within this distance to goal
+horizon_length: 12
+mppi_num_rollouts: 200
+pose_lim:               # [xmin,ymin],[xmax,ymax]
+  - [-4, -4]
+  - [4,  4]
+obs_array:
+  - [2.0,  0.0]
+  - [-2.0, 0.0]
+  - [0.0,  2.0]
+  - [0.0, -2.0]
+  - [2.0, -2.0]
+  - [2.0,  2.0]
+  - [-2.0, -2.0]
+  - [-1.0, +2.0]
+  - [2.0,1.0]
+  - [1.0,2.0]
+  - [-2.0,1.0]
+  - [-2.0,-1.0]
+num_obs: 12          # number of obstacles
+dim_euclid: 2
+
+pose_lim:
+  - [-4, -4]        # [x_min, x_max]
+  - [ 4,  4]        # [y_min, y_max]
+
+noise_std_dev: 0.05 # per‐step noise standard deviation
+
+horizon_length: 10      # planning horizon
+mppi_num_rollouts: 100  # number of sampled rollouts
+
+knot_scale: 2       # down‐sampling factor for control knots
+degree: 3           # spline degree for control interpolation
+
+beta: 7             # MPPI temperature
+beta_u_bound: 10    # upper bound on β 
+beta_l_bound: 5     # lower bound on β
+param_exploration: 0.2
+update_beta: true   # whether to adapt β online
+
+sampling_type: gaussian_halton
+collision_cost_weight: 50 # cost for collision
+stage_goal_cost_weight: 5  # stage cost for the goal
+stage_goal_cost_weight_orient: 1e-2  # stage cost for the orientation
+terminal_goal_cost_weight: 10 #terminal cost for the goal
+terminal_goal_cost_weight_orient: 1e-2 #terminal cost for the orientation 
