@@ -138,7 +138,7 @@ class MPPI:
         curr_st = curr_st.reshape((self.dim_st,1))
         goal = goal.reshape((self.dim_st,1))
         assert curr_st.shape == (self.dim_st,1) and goal.shape == (self.dim_st,1)
-        self.control_pert_key,current_key = jax.random.split(self.key,2)
+        self.control_pert_key,current_key = jax.random.split(self.control_pert_key,2)
         predicted_obs_array = self.obs
         goal_pose = goal
         previous_control = self.U_seqs

@@ -153,7 +153,7 @@ class MPPI:
         
     def compute_control(self,curr_st):
         assert curr_st.shape == (self.dim_st,1)
-        self.control_pert_key,current_key = jax.random.split(self.key,2)
+        self.control_pert_key,current_key = jax.random.split(self.control_pert_key,2)
         predicted_obs_array = self.obs
         goal_pose = self.goal
         previous_control = self.U_seqs
