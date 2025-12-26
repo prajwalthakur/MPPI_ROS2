@@ -1,7 +1,6 @@
 from setuptools import find_packages, setup
 from  glob import glob
-package_name = 'mppi_planner'
-
+package_name = 'obstacle_sim'
 setup(
     name=package_name,
     version='0.0.0',
@@ -10,8 +9,8 @@ setup(
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
-        ('share/' + package_name + '/worlds', glob('worlds/*.world')),         # ✅ ADD THIS LINE
-        ('share/' + package_name + '/config', glob('config/*.rviz')),          # Optional, if using rviz configs
+        ('share/' + package_name + '/worlds', glob('worlds/*.world')),         
+        ('share/' + package_name + '/config', glob('config/*.rviz')),         
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,8 +21,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'mppi_planner_node = mppi_planner.mppi_planner_node:main',
-            'spawn_cylinder =  mppi_planner.spawn_cylinder:main'
+            'spawn_cylinder =  obstacle_sim.spawn_cylinder:main',
+            'obstacle_sim = obstacle_sim.obstacle_sim:main'
         ],
     },
 )

@@ -12,7 +12,9 @@ RUN apt-get install --no-install-recommends -y \
     vim \
     python3-pip\
     tmux \
-    git 
+    git \
+    libyaml-cpp-dev
+
 
 # Added updated mesa drivers for integration with cpu - https://github.com/ros2/rviz/issues/948#issuecomment-1428979499
 RUN add-apt-repository ppa:kisak/kisak-mesa && \
@@ -84,7 +86,7 @@ RUN git clone https://github.com/prajwalthakur/ghalton.git && cd ghalton && pip 
 
 # Copy workspace files
 ENV WORKSPACE_PATH=/root/workspace
-COPY workspace/ $WORKSPACE_PATH/src/
+COPY workspace/src/ $WORKSPACE_PATH/src/
 
 
 # Set shell to bash

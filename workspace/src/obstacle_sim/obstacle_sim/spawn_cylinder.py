@@ -11,8 +11,19 @@ import numpy as np
 CYLINDER_SDF = """<?xml version='1.0'?>
 <sdf version='1.6'>
   <model name='{name}'>
-    <static>true</static>
+    <static>false</static>
+
     <link name='link'>
+      <gravity>false</gravity>
+      <inertial>
+        <mass>5.0</mass>
+        <inertia>
+          <ixx>0.083</ixx>
+          <iyy>0.083</iyy>
+          <izz>0.083</izz>
+        </inertia>
+      </inertial>
+
       <collision name='collision'>
         <geometry>
           <cylinder>
@@ -20,7 +31,16 @@ CYLINDER_SDF = """<?xml version='1.0'?>
             <length>{height}</length>
           </cylinder>
         </geometry>
+
+        <category_bitmask>0x02</category_bitmask>
+
+        <surface>
+          <contact>
+            <collide_bitmask>0x01</collide_bitmask>
+          </contact>
+        </surface>
       </collision>
+
       <visual name='visual'>
         <geometry>
           <cylinder>
@@ -33,7 +53,19 @@ CYLINDER_SDF = """<?xml version='1.0'?>
           <diffuse>0.7 0.1 0.1 1</diffuse>
         </material>
       </visual>
+
     </link>
+    
+  <plugin name="planar_move" filename="libgazebo_ros_planar_move.so">
+    <ros>
+      <namespace>/{name}</namespace>
+    </ros>
+    <bodyName>link</bodyName>
+    <commandTopic>cmd_vel</commandTopic>
+    <odometryTopic>odom</odometryTopic>
+    <odometryFrame>odom</odometryFrame>
+    <robotBaseFrame>base_link</robotBaseFrame>
+  </plugin>
   </model>
 </sdf>
 """
@@ -79,6 +111,9 @@ with open('src/mppi_planner/config/sim_config.yaml', 'r') as f:
 obs_array  = np.array(cfg['obs_array'])
 obs_radius = cfg['obs_r']
 obs_height = cfg['obs_h']
+
+
+
 
 def main(args=None):
     rclpy.init(args=args)

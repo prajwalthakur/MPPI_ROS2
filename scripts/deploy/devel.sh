@@ -22,10 +22,10 @@ shift "$(($OPTIND -1))"
 
 if [ "$mode" == "gpu" ]; then
     run_docker --runtime=nvidia \
-    -v ${PROJECT_ROOT}/workspace/:/root/workspace/src \
+    -v ${PROJECT_ROOT}/workspace/src/:/root/workspace/src \
     mppi_ros2:latest bash
 else
     run_docker \
-    -v ${PROJECT_ROOT}/workspace/:/root/workspace/src \
+    -v ${PROJECT_ROOT}/workspace/src/:/root/workspace/src \
     mppi_ros2:latest bash
 fi
