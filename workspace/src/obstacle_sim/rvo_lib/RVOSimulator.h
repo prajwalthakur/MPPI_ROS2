@@ -43,6 +43,7 @@
 #include <vector>
 
 #include "Vector2.h"
+#include <memory>
 // #include "nav_rvo.h"
 
 namespace RVO {
@@ -145,7 +146,7 @@ namespace RVO {
 		 *             defaults have not been set.
 		 */
 		size_t addAgent(const Vector2 &position);
-
+		size_t addAgent(std::string name , const Vector2 &position,const Vector2 &velocity);
 		/**
 		 * \brief      Adds a new agent to the simulation.
 		 * \param      position        The two-dimensional starting position of
@@ -191,6 +192,15 @@ namespace RVO {
 						size_t maxNeighbors, float timeHorizon,
 						float timeHorizonObst, float radius, float maxSpeed,
 						const Vector2 &velocity = Vector2());
+		size_t addAgent(std::string name, 
+						const Vector2 &position, 
+						float neighborDist, 
+						size_t maxNeighbors, 
+						float timeHorizon, 
+						float timeHorizonObst, 
+						float radius, 
+						float maxSpeed, 
+						const Vector2 &velocity = Vector2())
 
 		/**
 		 * \brief      Adds a new obstacle to the simulation.
@@ -220,7 +230,7 @@ namespace RVO {
 		 *                             retrieved.
 		 * \return     The number of the neighboring agent.
 		 */
-		size_t getAgentAgentNeighbor(size_t agentNo, size_t neighborNo) const;
+		//size_t getAgentAgentNeighbor(size_t agentNo, size_t neighborNo) const;
 
 		/**
 		 * \brief      Returns the maximum neighbor count of a specified agent.
@@ -228,7 +238,7 @@ namespace RVO {
 		 *                             neighbor count is to be retrieved.
 		 * \return     The present maximum neighbor count of the agent.
 		 */
-		size_t getAgentMaxNeighbors(size_t agentNo) const;
+		//size_t getAgentMaxNeighbors(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the maximum speed of a specified agent.
@@ -236,7 +246,7 @@ namespace RVO {
 		 *                             is to be retrieved.
 		 * \return     The present maximum speed of the agent.
 		 */
-		float getAgentMaxSpeed(size_t agentNo) const;
+		//float getAgentMaxSpeed(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the maximum neighbor distance of a specified
@@ -245,7 +255,7 @@ namespace RVO {
 		 *                             neighbor distance is to be retrieved.
 		 * \return     The present maximum neighbor distance of the agent.
 		 */
-		float getAgentNeighborDist(size_t agentNo) const;
+		//float getAgentNeighborDist(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the count of agent neighbors taken into account to
@@ -255,7 +265,7 @@ namespace RVO {
 		 * \return     The count of agent neighbors taken into account to compute
 		 *             the current velocity for the specified agent.
 		 */
-		size_t getAgentNumAgentNeighbors(size_t agentNo) const;
+		//size_t getAgentNumAgentNeighbors(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the count of obstacle neighbors taken into account
@@ -265,7 +275,7 @@ namespace RVO {
 		 * \return     The count of obstacle neighbors taken into account to
 		 *             compute the current velocity for the specified agent.
 		 */
-		size_t getAgentNumObstacleNeighbors(size_t agentNo) const;
+		//size_t getAgentNumObstacleNeighbors(size_t agentNo) const;
 
 
 		/**
@@ -276,7 +286,7 @@ namespace RVO {
 		 * \return     The count of ORCA constraints used to compute the current
 		 *             velocity for the specified agent.
 		 */
-		size_t getAgentNumORCALines(size_t agentNo) const;
+		//size_t getAgentNumORCALines(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the specified obstacle neighbor of the specified
@@ -288,7 +298,7 @@ namespace RVO {
 		 * \return     The number of the first vertex of the neighboring obstacle
 		 *             edge.
 		 */
-		size_t getAgentObstacleNeighbor(size_t agentNo, size_t neighborNo) const;
+		//size_t getAgentObstacleNeighbor(size_t agentNo, size_t neighborNo) const;
 
 		/**
 		 * \brief      Returns the specified ORCA constraint of the specified
@@ -302,7 +312,7 @@ namespace RVO {
 		 *             permissible velocities with respect to the specified
 		 *             ORCA constraint.
 		 */
-		const Line &getAgentORCALine(size_t agentNo, size_t lineNo) const;
+		//const Line &getAgentORCALine(size_t agentNo, size_t lineNo) const;
 
 		/**
 		 * \brief      Returns the two-dimensional position of a specified
@@ -313,6 +323,7 @@ namespace RVO {
 		 *             agent.
 		 */
 		const Vector2 &getAgentPosition(size_t agentNo) const;
+		const Vector2 &getAgentPosition(std::string name) const;
 
 		/**
 		 * \brief      Returns the two-dimensional preferred velocity of a
@@ -331,6 +342,7 @@ namespace RVO {
 		 * \return     The present radius of the agent.
 		 */
 		float getAgentRadius(size_t agentNo) const;
+		float getAgentRadius(std::string name) const;
 
 		/**
 		 * \brief      Returns the time horizon of a specified agent.
@@ -338,7 +350,7 @@ namespace RVO {
 		 *                             is to be retrieved.
 		 * \return     The present time horizon of the agent.
 		 */
-		float getAgentTimeHorizon(size_t agentNo) const;
+		//float getAgentTimeHorizon(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the time horizon with respect to obstacles of a
@@ -349,7 +361,7 @@ namespace RVO {
 		 * \return     The present time horizon with respect to obstacles of the
 		 *             agent.
 		 */
-		float getAgentTimeHorizonObst(size_t agentNo) const;
+		//float getAgentTimeHorizonObst(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the two-dimensional linear velocity of a
@@ -359,7 +371,7 @@ namespace RVO {
 		 *                             retrieved.
 		 * \return     The present two-dimensional linear velocity of the agent.
 		 */
-		const Vector2 &getAgentVelocity(size_t agentNo) const;
+		//const Vector2 &getAgentVelocity(size_t agentNo) const;
 
 		/**
 		 * \brief      Returns the global time of the simulation.
@@ -528,6 +540,7 @@ namespace RVO {
 		 *                             preferred velocity.
 		 */
 		void setAgentPrefVelocity(size_t agentNo, const Vector2 &prefVelocity);
+		void setAgentPrefVelocity(std::string name, const Vector2 &prefVelocity);
 
 		/**
 		 * \brief      Sets the radius of a specified agent.
@@ -536,7 +549,7 @@ namespace RVO {
 		 * \param      radius          The replacement radius.
 		 *                             Must be non-negative.
 		 */
-		void setAgentRadius(size_t agentNo, float radius);
+		//void setAgentRadius(size_t agentNo, float radius);
 
 		/**
 		 * \brief      Sets the time horizon of a specified agent with respect
@@ -546,7 +559,7 @@ namespace RVO {
 		 * \param      timeHorizon     The replacement time horizon with respect
 		 *                             to other agents. Must be positive.
 		 */
-		void setAgentTimeHorizon(size_t agentNo, float timeHorizon);
+		//void setAgentTimeHorizon(size_t agentNo, float timeHorizon);
 
 		/**
 		 * \brief      Sets the time horizon of a specified agent with respect
@@ -556,7 +569,7 @@ namespace RVO {
 		 * \param      timeHorizonObst The replacement time horizon with respect to
 		 *                             obstacles. Must be positive.
 		 */
-		void setAgentTimeHorizonObst(size_t agentNo, float timeHorizonObst);
+		//void setAgentTimeHorizonObst(size_t agentNo, float timeHorizonObst);
 
 		/**
 		 * \brief      Sets the two-dimensional linear velocity of a specified
@@ -567,7 +580,7 @@ namespace RVO {
 		 * \param      velocity        The replacement two-dimensional linear
 		 *                             velocity.
 		 */
-		void setAgentVelocity(size_t agentNo, const Vector2 &velocity);
+		//void setAgentVelocity(size_t agentNo, const Vector2 &velocity);
 
 		/**
 		 * \brief      Sets the time step of the simulation.
@@ -575,9 +588,10 @@ namespace RVO {
 		 *                             Must be positive.
 		 */
 		void setTimeStep(float timeStep);
-
+		
 	private:
 		std::vector<Agent *> agents_;
+		std::unordered_map<std::string,std::unique_ptr<Agent>> mAgentsMap;
 		Agent *defaultAgent_;
 		float globalTime_;
 		KdTree *kdTree_;

@@ -121,6 +121,7 @@ namespace RVO {
 		
 
 		size_t id_;
+		std::string name;
 
 		friend class KdTree;
 		friend class RVOSimulator;

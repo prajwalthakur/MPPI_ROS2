@@ -5,14 +5,31 @@
 namespace RVO
 {
 
+
+
+
 RVOPlanner::RVOPlanner(std::string simulation) : simulator(std::move(simulation))
 {
     sim = new RVO::RVOSimulator();
+
 };
 
 void RVOPlanner::setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed)
 {
     sim->setAgentDefaults(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed);
+}
+
+void RVOPlanner::setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, std::vector<double> mLimitGoal )
+{
+    sim->setAgentDefaults(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed);
+    double minX_,maxX_,minY_,maxY_ = mLimitGoal[0] , mLimitGoal[1] , mLimitGoal[2] , mLimitGoal[3];
+    std::random_device rd;
+    std::default_random_engine e(rd());
+    std::uniform_real_distribution<int> seedGen;
+    mXCoordSampler = std::make_shared<UniformSampler>(minX_,maxX_, seedGen(e));
+    mYCoordSampler = std::make_shared<UniformSampler>(minY_,maxY_, seedGen(e));
+    mRandomDecisionSampler = std::make_shared<UniformSampler>(0, 10, seedGen(e));
+
 }
 
 // set the goal manually
@@ -115,6 +132,129 @@ void RVOPlanner::randGoal(const float limit_goal[4], const std::string &model)
     }
 }
 
+void RVOPlanner::setGoalByAgent(std::string name, const float limit_goal[4], const std::string &model)
+{   
+    double x = mXCoordSampler->sample();
+    double y = mYCoordSampler->sample();
+    int rand = mYCoordSampler->sample();
+    
+    if (model == "default")
+        if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+            mAgentGoalMap[name] =  (Vector2(x, y));
+    else if (model == "random")
+    {
+       mAgentGoalMap[name]  = (Vector2(x, y));
+    }
+}
+
+
+bool RVOPlanner::isAgentArrived(const st::string agentName)
+{
+    if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+    {
+        return true;
+    }
+    return false;
+}
+
+void RVOPlanner::setPreferredVelocitiesbyNameMap()
+{
+    for(const auto& agentName : mAgentNameCollection)
+    {
+        if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+        {
+            sim->setAgentPrefVelocity(agentName, RVO::Vector2(0.0f   , 0.0f ));
+
+        }
+        else
+        {
+            sim->setAgentPrefVelocity(agentName, normalize(mAgentGoalMap[agentName] -  sim->getAgentPosition(agentName)) + RVO::Vector2(noise.first, noise.second) );
+
+        }
+    }
+}
+
+void RVOPlanner::setPreferredVelocitiesbyName(std::string agentName, RVO::Vector2 noise)
+{
+    
+    if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+    {
+        sim->setAgentPrefVelocity(agentName, RVO::Vector2(0.0f, 0.0f) + noise );
+
+    }
+    else
+    {
+
+        sim->setAgentPrefVelocity(agentName, normalize(mAgentGoalMap[agentName] -  sim->getAgentPosition(agentName) ) + noise );
+
+    }
+    
+}
+
+bool RVOPlanner::ifAgentExistInmap(std::string name)
+{
+    if(mAgentsMap.find(name)!= mAgentsMap.end())
+        return true;
+    return false;
+}
+
+void RVOPlanner::addAgentinSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name)
+{
+    float obs_x  = msg->pose.pose.position.x;
+    float obs_y  = msg->pose.pose.position.y;
+    float vel_x = msg->twist.twist.linear.x;
+    float vel_y = msg->twist.twist.linear.y;
+    sim->addAgent(agent_name, RVO::Vector2(obs_x, obs_y));
+    mAgentNameCollection.push_back(agent_name);
+
+}
+
+
+void RVOPlanner::UpdateAgentStateSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name)
+{
+    float obs_x  = msg->pose.pose.position.x;
+    float obs_y  = msg->pose.pose.position.y;
+    float vel_x = msg->twist.twist.linear.x;
+    float vel_y = msg->twist.twist.linear.y;
+    sim->mAgentsMap[agent_name]->position_  =   RVO::Vector2(obs_x, obs_y);
+    sim->mAgentsMap[agent_name]->velocity_  =  RVO::Vector2(vel_x, vel_y);
+}
+
+// Currently at once we update the velocity of all the agent,
+// but can be update independently
+
+std::unordered_map<std::string, std::shared_ptr<RVO::Vector2>> RVOPlanner::stepCenteralised()
+{
+    sim->kdTree_->buildAgentTree();
+    std::unordered_map<std::string, std::shared_ptr<RVO::Vector2>>  velMap;
+    for(const auto& (name, agent) : sim->mAgentsMap)
+    {
+        agent->computeNeighbors();
+        agent->computeNewVelocity();
+        auto vel = std::make_shared<RVO::Vector2>(agent->newVelocity_.x(), agent->newVelocity_.y());
+        velMap[name] = vel;
+    }
+    return velMap;
+}
+
+
+std::vector<RVO::Vector2 *> RVOPlanner::step()
+{
+    sim->kdTree_->buildAgentTree();
+    newVelocities.clear();
+
+    for (auto & agent : sim->agents_)
+    {
+        agent->computeNeighbors();
+        agent->computeNewVelocity();
+        auto *new_vel = new Vector2(agent->newVelocity_.x(), agent->newVelocity_.y());
+        newVelocities.push_back(new_vel);
+    }
+
+    return newVelocities;
+}
+
+
 bool RVOPlanner::arrived()
 {
     bool reach = true;
@@ -127,8 +267,6 @@ bool RVOPlanner::arrived()
 
     return reach;
 }
-
-
 
 void RVOPlanner::setInitial()
 {
@@ -150,6 +288,7 @@ void RVOPlanner::setPreferredVelocities()
         }
     }
 }
+
 
 void RVOPlanner::updateState_gazebo(gazebo_msgs::ModelStates::ConstPtr model_msg, std::string agent_name)
 {
@@ -194,20 +333,7 @@ void RVOPlanner::updateState_gazebo(gazebo_msgs::ModelStates::ConstPtr model_msg
         std::cout << "error: please check the simulator" << std::endl;
 }
 
-std::vector<RVO::Vector2 *> RVOPlanner::step()
-{
-    sim->kdTree_->buildAgentTree();
-    newVelocities.clear();
 
-    for (auto & agent : sim->agents_)
-    {
-        agent->computeNeighbors();
-        agent->computeNewVelocity();
-        auto *new_vel = new Vector2(agent->newVelocity_.x(), agent->newVelocity_.y());
-        newVelocities.push_back(new_vel);
-    }
 
-    return newVelocities;
-}
 
 }; // namespace RVO

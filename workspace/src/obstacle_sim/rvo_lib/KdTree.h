@@ -189,6 +189,7 @@ namespace RVO {
 									  const ObstacleTreeNode *node) const;
 
 		std::vector<Agent *> agents_;
+		std::unordered_map<std::string, std::shared_ptr<Agent>> mAgentsMap;
 		std::vector<AgentTreeNode> agentTree_;
 		ObstacleTreeNode *obstacleTree_;
 		RVOSimulator *sim_;
