@@ -165,7 +165,7 @@ void RVOPlanner::randGoal(const float limit_goal[4], const std::string &model)
     }
 }
 
-void RVOPlanner::setGoalByAgent(std::string agentName, const float limit_goal[4], const std::string &model)
+void RVOPlanner::setGoalByAgent(std::string agentName, const std::vector<double>& limits, const std::string & model)
 {   
     double x = mXCoordSampler->sample();
     double y = mYCoordSampler->sample();

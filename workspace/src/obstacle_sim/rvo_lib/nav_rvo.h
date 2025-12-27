@@ -45,7 +45,7 @@ namespace RVO {
         void UpdateAgentStateSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name);
         bool ifAgentExistInmap(std::string name);
         void setGoal();
-        void setGoalByAgent(std::string name, const float limit_goal[4], const std::string &model);
+        void setGoalByAgent(std::string agentName, const std::vector<double>& limits, const std::string &model);
         void randGoal(const float limit_goal[4], const std::string &model="default");
         void randomOnceGoal(const float limit_goal[4]);
         bool arrived();

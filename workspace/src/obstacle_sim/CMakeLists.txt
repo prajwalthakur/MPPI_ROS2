@@ -54,6 +54,7 @@ ament_target_dependencies(obstacle_sim_node
 
 target_link_libraries(obstacle_sim_node
   rvolib
+  yaml-cpp
 )
 
 # add_executable(set_goals_client src/set_goals_client.cpp)
@@ -91,6 +92,11 @@ install(PROGRAMS
   obstacle_sim/obstacle_sim.py
   obstacle_sim/spawn_cylinder.py
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 # --------------------

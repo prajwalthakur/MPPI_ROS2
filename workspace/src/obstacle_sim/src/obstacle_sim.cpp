@@ -87,11 +87,11 @@ public:
 
 private:
 
-  void rvo_goals_init()
-  {
-    mRVO->randGoal("default");
-    mRVO->setInitial();
-  }
+  // void rvo_goals_init()
+  // {
+  //   mRVO->randGoal("default");
+  //   mRVO->setInitial();
+  // }
 
 
   /* -------- Odom Callback -------- */
@@ -105,14 +105,15 @@ private:
     s.y  = msg->pose.pose.position.y;
     s.vx = msg->twist.twist.linear.x;
     s.vy = msg->twist.twist.linear.y;
-    if(mRVO->ifAgentExistInmap())
-      mRVO->UpdateStateSim(msg, name);
+    if(mRVO->ifAgentExistInmap(name))
+      mRVO->UpdateAgentStateSim(msg, name);
     else
     {
       // Add the agent in the pool
       mRVO->addAgentinSim(msg,name);
       // also set the rand goal for it
-      mRVO->setGoalByAgent(msg,name);
+      std::string modelDyn = "default";
+      mRVO->setGoalByAgent(name,mLimitGoal,modelDyn);
     }
   }
 
@@ -132,7 +133,11 @@ private:
       auto noise = samplers_[name]->sample();
       mRVO->setPreferredVelocitiesbyName(name,RVO::Vector2(noise.first, noise.second));
       if(mRVO->isAgentArrived(name))
-        mRVO->setGoalByAgent(name,mLimitGoal,"default");
+      {
+        std::string modelDyn = "default";
+        mRVO->setGoalByAgent(name,mLimitGoal, modelDyn);
+
+      }
     }
 
     std::unordered_map<std::string, std::shared_ptr<RVO::Vector2>> new_velocities = mRVO->stepCenteralised();
