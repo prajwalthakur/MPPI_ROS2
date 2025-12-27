@@ -1,6 +1,0 @@
-string model
-geometry_msgs/Point[] coordinates
----
-int64 num_goal
-
-

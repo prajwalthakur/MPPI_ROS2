@@ -44,6 +44,7 @@
 
 #include "Vector2.h"
 #include <memory>
+#include <unordered_map>
 // #include "nav_rvo.h"
 
 namespace RVO {
@@ -147,6 +148,7 @@ namespace RVO {
 		 */
 		size_t addAgent(const Vector2 &position);
 		size_t addAgent(std::string name , const Vector2 &position,const Vector2 &velocity);
+		bool ifAgentExistInmap(std::string name);
 		/**
 		 * \brief      Adds a new agent to the simulation.
 		 * \param      position        The two-dimensional starting position of
@@ -200,7 +202,7 @@ namespace RVO {
 						float timeHorizonObst, 
 						float radius, 
 						float maxSpeed, 
-						const Vector2 &velocity = Vector2())
+						const Vector2 &velocity = Vector2());
 
 		/**
 		 * \brief      Adds a new obstacle to the simulation.
@@ -501,7 +503,7 @@ namespace RVO {
 		 *                             neighbor count is to be modified.
 		 * \param      maxNeighbors    The replacement maximum neighbor count.
 		 */
-		void setAgentMaxNeighbors(size_t agentNo, size_t maxNeighbors);
+		//void setAgentMaxNeighbors(size_t agentNo, size_t maxNeighbors);
 
 		/**
 		 * \brief      Sets the maximum speed of a specified agent.
@@ -510,7 +512,7 @@ namespace RVO {
 		 * \param      maxSpeed        The replacement maximum speed. Must be
 		 *                             non-negative.
 		 */
-		void setAgentMaxSpeed(size_t agentNo, float maxSpeed);
+		//void setAgentMaxSpeed(size_t agentNo, float maxSpeed);
 
 		/**
 		 * \brief      Sets the maximum neighbor distance of a specified agent.
@@ -519,7 +521,7 @@ namespace RVO {
 		 * \param      neighborDist    The replacement maximum neighbor distance.
 		 *                             Must be non-negative.
 		 */
-		void setAgentNeighborDist(size_t agentNo, float neighborDist);
+		//void setAgentNeighborDist(size_t agentNo, float neighborDist);
 
 		/**
 		 * \brief      Sets the two-dimensional position of a specified agent.
@@ -528,7 +530,7 @@ namespace RVO {
 		 * \param      position        The replacement of the two-dimensional
 		 *                             position.
 		 */
-		void setAgentPosition(size_t agentNo, const Vector2 &position);
+		//void setAgentPosition(size_t agentNo, const Vector2 &position);
 
 		/**
 		 * \brief      Sets the two-dimensional preferred velocity of a
@@ -591,7 +593,7 @@ namespace RVO {
 		
 	private:
 		std::vector<Agent *> agents_;
-		std::unordered_map<std::string,std::unique_ptr<Agent>> mAgentsMap;
+		std::unordered_map<std::string,std::shared_ptr<Agent>> mAgentsMap;
 		Agent *defaultAgent_;
 		float globalTime_;
 		KdTree *kdTree_;

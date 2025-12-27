@@ -139,7 +139,7 @@ namespace RVO {
 
 		agent->id_ = mAgentsMap.size();
 		agent->name = name;
-		agents_.push_back(agent);
+		agents_.push_back(agent.get());
 		mAgentsMap[name] = agent ;
 		return agents_.size() - 1;
 	}
@@ -147,7 +147,7 @@ namespace RVO {
 	size_t RVOSimulator::addAgent(std::string name, const Vector2 &position, float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, const Vector2 &velocity)
 	{
 		//Agent *agent = new Agent(this);
-		std::shared_ptr<Agent> agent  = std::shared_ptr<Agent>(this);
+		std::shared_ptr<Agent> agent  = std::make_shared<Agent>(this);
 		agent->position_ = position;
 		agent->maxNeighbors_ = maxNeighbors;
 		agent->maxSpeed_ = maxSpeed;
@@ -159,11 +159,19 @@ namespace RVO {
 
 		agent->id_ = mAgentsMap.size();
 		agent->name = name;
-		agents_.push_back(agent);
+		agents_.push_back(agent.get());
 		mAgentsMap[name] =agent;
 		return agents_.size() - 1;
 	}
 
+
+	bool RVOSimulator::ifAgentExistInmap(std::string name)
+	{
+		
+		if(mAgentsMap.find(name)!= mAgentsMap.end())
+			return true;
+		return false;
+	}
 	size_t RVOSimulator::addObstacle(const std::vector<Vector2> &vertices)
 	{
 		if (vertices.size() < 2) {
@@ -279,7 +287,7 @@ namespace RVO {
 
 	const Vector2 &RVOSimulator::getAgentPosition(std::string name) const
 	{
-		return mAgentsMap[name]->position_;
+		return mAgentsMap.at(name)->position_;
 	}
 	
 	// const Vector2 &RVOSimulator::getAgentPrefVelocity(size_t agentNo) const
@@ -294,7 +302,7 @@ namespace RVO {
 
 	float RVOSimulator::getAgentRadius(std::string name) const
 	{
-		return mAgentsMap[name]->radius_;
+		return mAgentsMap.at(name)->radius_;
 	}
 	// float RVOSimulator::getAgentTimeHorizon(size_t agentNo) const
 	// {

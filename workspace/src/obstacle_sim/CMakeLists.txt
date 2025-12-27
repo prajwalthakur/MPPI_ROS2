@@ -13,12 +13,8 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(yaml-cpp REQUIRED)
-# If you have custom services
-find_package(rosidl_default_generators REQUIRED)
-
-# Gazebo (for plugins / headers if needed)
-# find_package(gazebo REQUIRED)
 
 # --------------------
 # Include directories
@@ -26,18 +22,7 @@ find_package(rosidl_default_generators REQUIRED)
 include_directories(
   include
   rvo_lib
-  #${gazebo_INCLUDE_DIRS}
 )
-
-# --------------------
-# Custom service (ROS 2 way)
-# --------------------
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/SetGoals.srv"
-  DEPENDENCIES geometry_msgs std_msgs
-)
-
-ament_export_dependencies(rosidl_default_runtime)
 
 # --------------------
 # RVO shared library
@@ -52,6 +37,8 @@ add_library(rvolib SHARED
 
 ament_target_dependencies(rvolib
   rclcpp
+  geometry_msgs
+  nav_msgs
 )
 
 # --------------------
@@ -62,23 +49,24 @@ ament_target_dependencies(obstacle_sim_node
   rclcpp
   geometry_msgs
   std_msgs
+  nav_msgs
 )
 
 target_link_libraries(obstacle_sim_node
   rvolib
 )
 
-add_executable(set_goals_client src/set_goals_client.cpp)
-ament_target_dependencies(set_goals_client
-  rclcpp
-  geometry_msgs
-)
+# add_executable(set_goals_client src/set_goals_client.cpp)
+# ament_target_dependencies(set_goals_client
+#   rclcpp
+#   geometry_msgs
+# )
 
-add_executable(formation_node src/formation.cpp)
-ament_target_dependencies(formation_node
-  rclcpp
-  geometry_msgs
-)
+# add_executable(formation_node src/formation.cpp)
+# ament_target_dependencies(formation_node
+#   rclcpp
+#   geometry_msgs
+# )
 
 # --------------------
 # Install C++ targets
@@ -87,8 +75,8 @@ install(
   TARGETS
     rvolib
     obstacle_sim_node
-    set_goals_client
-    formation_node
+    # set_goals_client
+    # formation_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

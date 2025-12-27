@@ -5,8 +5,9 @@
 #include "KdTree.h"
 #include "Definitions.h"
 #include "Obstacle.h"
-#include "gazebo_msgs/ModelStates.h"
-#include "geometry_msgs/Point.h"
+// #include "gazebo_msgs/ModelStates.h"
+#include <geometry_msgs/msg/point.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include "RVOSimulator.h"
 #include <string>
 #include <random>
@@ -15,12 +16,12 @@
 class UniformSampler
 {
 public:
-  UniformSampler(double minVal, double maxVal int seed)
+  UniformSampler(double minVal, double maxVal, int seed)
   : gen_(seed), dist_(minVal, maxVal) {}
 
-  std::pair<double,double> sample()
+  double sample()
   {
-    return {dist_(gen_), dist_(gen_)};
+    return dist_(gen_);
   }
 private:
   std::mt19937 gen_;
@@ -38,18 +39,18 @@ namespace RVO {
         RVOPlanner(std::string simulation);
 
         void setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed);
-
-        void updateState_gazebo(gazebo_msgs::ModelStates::ConstPtr model_msg, std::string agent_name);
+        void setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, const std::vector<double>& limitGoal );
+        //void updateState_gazebo(gazebo_msgs::ModelStates::ConstPtr model_msg, std::string agent_name);
         void addAgentinSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name);
-        void UpdateAgentStateSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name)
+        void UpdateAgentStateSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name);
         bool ifAgentExistInmap(std::string name);
         void setGoal();
         void setGoalByAgent(std::string name, const float limit_goal[4], const std::string &model);
         void randGoal(const float limit_goal[4], const std::string &model="default");
         void randomOnceGoal(const float limit_goal[4]);
         bool arrived();
-        bool isAgentArrived(const st::string agentName);
-        void setGoal(std::vector<geometry_msgs::Point> set_goals);
+        bool isAgentArrived(const std::string agentName);
+        void setGoal(std::vector<geometry_msgs::msg::Point> set_goals);
         void setInitial();
         void setPreferredVelocities();
         void setPreferredVelocitiesbyNameMap();
@@ -66,7 +67,7 @@ namespace RVO {
         std::string simulator;
         std::vector <RVO::Vector2> goals;
         std::unordered_map<std::string, RVO::Vector2> mAgentGoalMap;
-        std::vector<std::name> mAgentNameCollection;
+        std::vector<std::string> mAgentNameCollection;
         bool IfInitial = false;
         std::vector<RVO::Vector2 *> newVelocities;
         std::shared_ptr<UniformSampler>  mXCoordSampler{nullptr};

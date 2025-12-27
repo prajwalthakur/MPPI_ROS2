@@ -11,7 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include "rvo_node.h"
+#include "../rvo_lib/nav_rvo.h"
 #include <memory>
 using std::placeholders::_1;
 
@@ -49,7 +49,7 @@ public:
     maxX_ = pose_lim_[1][0];
     maxY_ = pose_lim_[1][1];
     std::vector<double> mLimitGoal = {minX_,maxX_,minY_,maxY_};
-    mRVO = std::shared_ptr<RVO::RVOPlanner>("gazebo");
+    mRVO = std::make_shared<RVO::RVOPlanner>("gazebo");
     mRVO->goal_threshold = goalThreshold;
     mRVO->setupScenario(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, obs_r_, obs_v_max_, mLimitGoal );   // for exp
     

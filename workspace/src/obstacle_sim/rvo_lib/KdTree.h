@@ -39,7 +39,7 @@
  */
 
 #include "Definitions.h"
-
+#include <memory>
 namespace RVO {
 	/**
 	 * \brief      Defines <i>k</i>d-trees for agents and static obstacles in the

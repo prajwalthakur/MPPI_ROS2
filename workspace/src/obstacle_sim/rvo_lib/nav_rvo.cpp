@@ -1,5 +1,5 @@
 #include "nav_rvo.h"
-
+#include <iostream>
 #include <utility>
 
 namespace RVO
@@ -19,18 +19,51 @@ void RVOPlanner::setupScenario(float neighborDist, size_t maxNeighbors, float ti
     sim->setAgentDefaults(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed);
 }
 
-void RVOPlanner::setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, std::vector<double> mLimitGoal )
+void RVOPlanner::setupScenario(
+    float neighborDist,
+    size_t maxNeighbors,
+    float timeHorizon,
+    float timeHorizonObst,
+    float radius,
+    float maxSpeed,
+    const std::vector<double>& limitGoal  
+)
 {
-    sim->setAgentDefaults(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed);
-    double minX_,maxX_,minY_,maxY_ = mLimitGoal[0] , mLimitGoal[1] , mLimitGoal[2] , mLimitGoal[3];
-    std::random_device rd;
-    std::default_random_engine e(rd());
-    std::uniform_real_distribution<int> seedGen;
-    mXCoordSampler = std::make_shared<UniformSampler>(minX_,maxX_, seedGen(e));
-    mYCoordSampler = std::make_shared<UniformSampler>(minY_,maxY_, seedGen(e));
-    mRandomDecisionSampler = std::make_shared<UniformSampler>(0, 10, seedGen(e));
+    if (limitGoal.size() < 4) {
+        throw std::runtime_error("limitGoal must contain at least 4 values");
+    }
 
+    sim->setAgentDefaults(
+        neighborDist,
+        maxNeighbors,
+        timeHorizon,
+        timeHorizonObst,
+        radius,
+        maxSpeed
+    );
+
+    const double minX = limitGoal[0];
+    const double maxX = limitGoal[1];
+    const double minY = limitGoal[2];
+    const double maxY = limitGoal[3];
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> seedGen(0, 1000000);
+
+    mXCoordSampler = std::make_shared<UniformSampler>(
+        minX, maxX, seedGen(gen)
+    );
+
+    mYCoordSampler = std::make_shared<UniformSampler>(
+        minY, maxY, seedGen(gen)
+    );
+
+    mRandomDecisionSampler = std::make_shared<UniformSampler>(
+        0.0, 10.0, seedGen(gen)
+    );
 }
+
 
 // set the goal manually
 // default: invert direction
@@ -48,7 +81,7 @@ void RVOPlanner::setGoal()
     }
 }
 
-void RVOPlanner::setGoal(std::vector<geometry_msgs::Point> set_goals)
+void RVOPlanner::setGoal(std::vector<geometry_msgs::msg::Point> set_goals)
 {
     goals.clear();
     int num_agent = sim->agents_.size();
@@ -132,7 +165,7 @@ void RVOPlanner::randGoal(const float limit_goal[4], const std::string &model)
     }
 }
 
-void RVOPlanner::setGoalByAgent(std::string name, const float limit_goal[4], const std::string &model)
+void RVOPlanner::setGoalByAgent(std::string agentName, const float limit_goal[4], const std::string &model)
 {   
     double x = mXCoordSampler->sample();
     double y = mYCoordSampler->sample();
@@ -140,15 +173,15 @@ void RVOPlanner::setGoalByAgent(std::string name, const float limit_goal[4], con
     
     if (model == "default")
         if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
-            mAgentGoalMap[name] =  (Vector2(x, y));
+            mAgentGoalMap[agentName] =  (Vector2(x, y));
     else if (model == "random")
     {
-       mAgentGoalMap[name]  = (Vector2(x, y));
+       mAgentGoalMap[agentName]  = (Vector2(x, y));
     }
 }
 
 
-bool RVOPlanner::isAgentArrived(const st::string agentName)
+bool RVOPlanner::isAgentArrived(const std::string agentName)
 {
     if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
     {
@@ -168,7 +201,7 @@ void RVOPlanner::setPreferredVelocitiesbyNameMap()
         }
         else
         {
-            sim->setAgentPrefVelocity(agentName, normalize(mAgentGoalMap[agentName] -  sim->getAgentPosition(agentName)) + RVO::Vector2(noise.first, noise.second) );
+            sim->setAgentPrefVelocity(agentName, normalize(mAgentGoalMap[agentName] -  sim->getAgentPosition(agentName))) ;
 
         }
     }
@@ -193,7 +226,7 @@ void RVOPlanner::setPreferredVelocitiesbyName(std::string agentName, RVO::Vector
 
 bool RVOPlanner::ifAgentExistInmap(std::string name)
 {
-    if(mAgentsMap.find(name)!= mAgentsMap.end())
+    if(sim->ifAgentExistInmap(name))
         return true;
     return false;
 }
@@ -204,7 +237,7 @@ void RVOPlanner::addAgentinSim(nav_msgs::msg::Odometry::SharedPtr msg, std::stri
     float obs_y  = msg->pose.pose.position.y;
     float vel_x = msg->twist.twist.linear.x;
     float vel_y = msg->twist.twist.linear.y;
-    sim->addAgent(agent_name, RVO::Vector2(obs_x, obs_y));
+    sim->addAgent(agent_name, RVO::Vector2(obs_x, obs_y),RVO::Vector2(vel_x, vel_y));
     mAgentNameCollection.push_back(agent_name);
 
 }
@@ -227,7 +260,7 @@ std::unordered_map<std::string, std::shared_ptr<RVO::Vector2>> RVOPlanner::stepC
 {
     sim->kdTree_->buildAgentTree();
     std::unordered_map<std::string, std::shared_ptr<RVO::Vector2>>  velMap;
-    for(const auto& (name, agent) : sim->mAgentsMap)
+    for(const auto& [name, agent] : sim->mAgentsMap)
     {
         agent->computeNeighbors();
         agent->computeNewVelocity();
@@ -290,48 +323,48 @@ void RVOPlanner::setPreferredVelocities()
 }
 
 
-void RVOPlanner::updateState_gazebo(gazebo_msgs::ModelStates::ConstPtr model_msg, std::string agent_name)
-{
-    if (simulator == "gazebo")
-    {
-        auto models_name = model_msg->name;
-        int num = models_name.size();
-        int count = 0;
+// void RVOPlanner::updateState_gazebo(gazebo_msgs::ModelStates::ConstPtr model_msg, std::string agent_name)
+// {
+//     if (simulator == "gazebo")
+//     {
+//         auto models_name = model_msg->name;
+//         int num = models_name.size();
+//         int count = 0;
 
-        // sim->agents_.clear();
+//         // sim->agents_.clear();
 
-        for (int i = 0; i < num; i++)
-        {
-            // std::string full_agent_name = agent_name + std::to_string(i+1);
-            std::string full_agent_name = agent_name + std::to_string(i);
+//         for (int i = 0; i < num; i++)
+//         {
+//             // std::string full_agent_name = agent_name + std::to_string(i+1);
+//             std::string full_agent_name = agent_name + std::to_string(i);
 
-            auto iter_agent = std::find(models_name.begin(), models_name.end(), full_agent_name);
-            int agent_index = iter_agent - models_name.begin();
+//             auto iter_agent = std::find(models_name.begin(), models_name.end(), full_agent_name);
+//             int agent_index = iter_agent - models_name.begin();
 
-            if (iter_agent != models_name.end())
-            {
-                float obs_x = model_msg->pose[agent_index].position.x;
-                float obs_y = model_msg->pose[agent_index].position.y;
-                float vel_x = model_msg->twist[agent_index].linear.x;
-                float vel_y = model_msg->twist[agent_index].linear.y;
+//             if (iter_agent != models_name.end())
+//             {
+//                 float obs_x = model_msg->pose[agent_index].position.x;
+//                 float obs_y = model_msg->pose[agent_index].position.y;
+//                 float vel_x = model_msg->twist[agent_index].linear.x;
+//                 float vel_y = model_msg->twist[agent_index].linear.y;
 
-               if (IfInitial)
-               {
-                   sim->agents_[count]->position_ = RVO::Vector2(obs_x, obs_y);
-                   sim->agents_[count]->velocity_ = RVO::Vector2(vel_x, vel_y);
-               }
+//                if (IfInitial)
+//                {
+//                    sim->agents_[count]->position_ = RVO::Vector2(obs_x, obs_y);
+//                    sim->agents_[count]->velocity_ = RVO::Vector2(vel_x, vel_y);
+//                }
                    
-               else
-                   sim->addAgent(RVO::Vector2(obs_x, obs_y));
+//                else
+//                    sim->addAgent(RVO::Vector2(obs_x, obs_y));
 
-                count++;
-                // sim->agents_[i]->quater = model_msg->pose[agent_index].orientation;
-            }
-        }
-    }
-    else
-        std::cout << "error: please check the simulator" << std::endl;
-}
+//                 count++;
+//                 // sim->agents_[i]->quater = model_msg->pose[agent_index].orientation;
+//             }
+//         }
+//     }
+//     else
+//         std::cout << "error: please check the simulator" << std::endl;
+// }
 
 
 
