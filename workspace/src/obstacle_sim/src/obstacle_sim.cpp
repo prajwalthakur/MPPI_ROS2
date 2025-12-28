@@ -50,8 +50,7 @@ public:
     maxY_ = pose_lim_[1][1];
     std::vector<double> mLimitGoal = {minX_,maxX_,minY_,maxY_};
     mRVO = std::make_shared<RVO::RVOPlanner>("gazebo");
-    mRVO->goal_threshold = goalThreshold;
-    mRVO->setupScenario(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, obs_r_, obs_v_max_, mLimitGoal );   // for exp
+    mRVO->setupScenario(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, obs_r_, obs_v_max_, mLimitGoal,goalThreshold, randGoalChangeThreshold );   // for exp
     
     
     for (int i = 0; i < num_obs_; ++i)
@@ -86,13 +85,6 @@ public:
   }
 
 private:
-
-  // void rvo_goals_init()
-  // {
-  //   mRVO->randGoal("default");
-  //   mRVO->setInitial();
-  // }
-
 
   /* -------- Odom Callback -------- */
 
@@ -131,7 +123,7 @@ private:
     {
 
       auto noise = samplers_[name]->sample();
-      mRVO->setPreferredVelocitiesbyName(name,RVO::Vector2(noise.first, noise.second));
+      mRVO->setPreferredVelocitiesbyName(name,RVO::Vector2(0.0,0.0)); //RVO::Vector2(noise.first, noise.second)
       if(mRVO->isAgentArrived(name))
       {
         std::string modelDyn = "default";
@@ -161,18 +153,19 @@ private:
   {
     YAML::Node cfg = YAML::LoadFile("src/mppi_planner/config/sim_config.yaml");
 
-    dt_ = cfg["dt"].as<double>();
+    dt_ = cfg["obs_sim_dt"].as<double>();
     obs_r_ = cfg["obs_r"].as<double>();
     obs_cmd_noise_std_dev_ = cfg["obs_cmd_noise"].as<double>();
     boundary_eps_ = cfg["boundary_eps"].as<double>();
     obs_v_min_ = cfg["obs_v_min"].as<double>();
     obs_v_max_ = cfg["obs_v_max"].as<double>();
     num_obs_ = cfg["num_obs"].as<int>();
-    goalThreshold = cfg["goal_threshold"].as<double>();
+    goalThreshold = cfg["obs_goal_threshold"].as<double>();
     timeHorizon = cfg["time_horizon"].as<double>();
     timeHorizonObst = cfg["time_horizon_obst"].as<double>();
     maxNeighbors = cfg["max_neighbours"].as<double>();
     neighborDist = cfg["neighbor_dist"].as<double>();
+    randGoalChangeThreshold =  cfg["goal_rand_change"].as<double>();
     auto pose_lim = cfg["pose_lim"];
     pose_lim_.resize(2);
     for (int i = 0; i < 2; ++i)
@@ -205,6 +198,7 @@ private:
   std::vector<double> mLimitGoal;
   int num_obs_;
   double goalThreshold;
+  double randGoalChangeThreshold;
   double timeHorizon;
   double timeHorizonObst;
   double maxNeighbors;

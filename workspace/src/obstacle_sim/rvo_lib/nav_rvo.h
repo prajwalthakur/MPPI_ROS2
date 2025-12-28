@@ -38,8 +38,8 @@ namespace RVO {
     public:
         RVOPlanner(std::string simulation);
 
-        void setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed);
-        void setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, const std::vector<double>& limitGoal );
+        void setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, float goalThreshold);
+        void setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, const std::vector<double>& limitGoal, float goalThreshold, float randGoalChangeThreshold );
         //void updateState_gazebo(gazebo_msgs::ModelStates::ConstPtr model_msg, std::string agent_name);
         void addAgentinSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name);
         void UpdateAgentStateSim(nav_msgs::msg::Odometry::SharedPtr msg, std::string agent_name);
@@ -57,8 +57,8 @@ namespace RVO {
         void setPreferredVelocitiesbyName(std::string agentName, RVO::Vector2 noise);
         std::vector<RVO::Vector2*>  step();
         std::unordered_map<std::string, std::shared_ptr<RVO::Vector2>> stepCenteralised();
-        float goal_threshold = 0.03;
-        
+        float mGoalThreshold = 0.03;
+        float mRandThresholdPercentage = 50;
         
         
     private:

@@ -14,9 +14,10 @@ RVOPlanner::RVOPlanner(std::string simulation) : simulator(std::move(simulation)
 
 };
 
-void RVOPlanner::setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed)
+void RVOPlanner::setupScenario(float neighborDist, size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, float goalThreshold)
 {
     sim->setAgentDefaults(neighborDist, maxNeighbors, timeHorizon, timeHorizonObst, radius, maxSpeed);
+    mGoalThreshold = goalThreshold;
 }
 
 void RVOPlanner::setupScenario(
@@ -26,7 +27,7 @@ void RVOPlanner::setupScenario(
     float timeHorizonObst,
     float radius,
     float maxSpeed,
-    const std::vector<double>& limitGoal  
+    const std::vector<double>& limitGoal  ,  float goalThreshold
 )
 {
     if (limitGoal.size() < 4) {
@@ -41,7 +42,7 @@ void RVOPlanner::setupScenario(
         radius,
         maxSpeed
     );
-
+    mGoalThreshold = goalThreshold;
     const double minX = limitGoal[0];
     const double maxX = limitGoal[1];
     const double minY = limitGoal[2];
@@ -60,7 +61,7 @@ void RVOPlanner::setupScenario(
     );
 
     mRandomDecisionSampler = std::make_shared<UniformSampler>(
-        0.0, 10.0, seedGen(gen)
+        0.0, 100.0, seedGen(gen)
     );
 }
 
@@ -73,7 +74,7 @@ void RVOPlanner::setGoal()
 {
     for (size_t i = 0; i < sim->getNumAgents(); ++i)
     {
-        if (absSq(goals[i] - sim->getAgentPosition(i)) < goal_threshold)
+        if (absSq(goals[i] - sim->getAgentPosition(i)) < mGoalThreshold)
         {
             // goals[i] = -sim->getAgentPosition(i);
             goals[i] = -goals[i];
@@ -154,7 +155,7 @@ void RVOPlanner::randGoal(const float limit_goal[4], const std::string &model)
 
         else if (model == "default")
         {
-            if (absSq(goals[i] - sim->getAgentPosition(i)) < goal_threshold)
+            if (absSq(goals[i] - sim->getAgentPosition(i)) < mGoalThreshold)
                 goals[i] = (Vector2(x, y));
         }
         else if (model == "random")
@@ -172,18 +173,24 @@ void RVOPlanner::setGoalByAgent(std::string agentName, const std::vector<double>
     int rand = mYCoordSampler->sample();
     
     if (model == "default")
-        if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+        if(isAgentArrived(agentName))
             mAgentGoalMap[agentName] =  (Vector2(x, y));
     else if (model == "random")
     {
-       mAgentGoalMap[agentName]  = (Vector2(x, y));
+        if (rand > mRandThresholdPercentage)
+            mAgentGoalMap[agentName]  = (Vector2(x, y));
+        else
+        {
+            if(isAgentArrived(agentName))
+                mAgentGoalMap[agentName] =  (Vector2(x, y));
+        }
     }
 }
 
 
 bool RVOPlanner::isAgentArrived(const std::string agentName)
 {
-    if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+    if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < mGoalThreshold)
     {
         return true;
     }
@@ -194,7 +201,7 @@ void RVOPlanner::setPreferredVelocitiesbyNameMap()
 {
     for(const auto& agentName : mAgentNameCollection)
     {
-        if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+        if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < mGoalThreshold)
         {
             sim->setAgentPrefVelocity(agentName, RVO::Vector2(0.0f   , 0.0f ));
 
@@ -210,7 +217,7 @@ void RVOPlanner::setPreferredVelocitiesbyNameMap()
 void RVOPlanner::setPreferredVelocitiesbyName(std::string agentName, RVO::Vector2 noise)
 {
     
-    if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < goal_threshold)
+    if(absSq(mAgentGoalMap[agentName] - sim->getAgentPosition(agentName)) < mGoalThreshold)
     {
         sim->setAgentPrefVelocity(agentName, RVO::Vector2(0.0f, 0.0f) + noise );
 
@@ -294,7 +301,7 @@ bool RVOPlanner::arrived()
 
     for (size_t i = 0; i < sim->getNumAgents(); ++i)
     {
-        if (absSq(goals[i] - sim->getAgentPosition(i)) >= goal_threshold)
+        if (absSq(goals[i] - sim->getAgentPosition(i)) >= mGoalThreshold)
             reach = false;
     }
 
@@ -310,7 +317,7 @@ void RVOPlanner::setPreferredVelocities()
 {
     for (size_t i = 0; i < sim->getNumAgents(); ++i)
     {
-        if (absSq(goals[i] - sim->getAgentPosition(i)) < goal_threshold)
+        if (absSq(goals[i] - sim->getAgentPosition(i)) < mGoalThreshold)
         {
             // Agent is within one radius of its goal, set preferred velocity to zero
             sim->setAgentPrefVelocity(i, RVO::Vector2(0.0f, 0.0f));
