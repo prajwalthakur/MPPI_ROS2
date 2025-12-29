@@ -129,7 +129,7 @@ private:
       mRVO->setPreferredVelocitiesbyName(name,RVO::Vector2(0.0,0.0)); 
       if(mRVO->isAgentArrived(name))
       {
-        std::string modelDyn = "default";
+        std::string modelDyn = "default"; // "random" for Intent switching
         mRVO->setGoalByAgent(name,mLimitGoal, modelDyn);
 
       }
@@ -141,6 +141,8 @@ private:
       //RVO::Vector2(noise.first, noise.second)
       auto vx = speed->x() + noise.first;
       auto vy = speed->y() + noise.second ;
+      // auto vx = speed->x();
+      // auto vy = speed->y();
       geometry_msgs::msg::Twist cmd;
       // vx = std::clamp(vx, obs_v_min_, obs_v_max_);
       // vy = std::clamp(vy, obs_v_min_, obs_v_max_);
