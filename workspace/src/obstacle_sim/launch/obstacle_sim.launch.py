@@ -55,10 +55,11 @@ def generate_launch_description():
     )
     spawn_cylinders_node = Node(
         package='obstacle_sim',
-        executable='spawn_cylinder',
+        executable='spawn_cylinder.py',
         output='screen',
     )    
     return LaunchDescription([
         gazebo,
-        rviz_node
+        rviz_node,
+        spawn_cylinders_node
     ])

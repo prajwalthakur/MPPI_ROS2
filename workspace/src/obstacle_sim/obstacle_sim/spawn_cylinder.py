@@ -8,68 +8,44 @@ import yaml
 import numpy as np
 
 # A simple SDF mppi_docker for a cylinder of given radius and height
+# Updated Template for Option B
 CYLINDER_SDF = """<?xml version='1.0'?>
 <sdf version='1.6'>
   <model name='{name}'>
     <static>false</static>
-
-    <link name='link'>
+    <link name='{name}_link'>
       <gravity>false</gravity>
       <inertial>
         <mass>5.0</mass>
-        <inertia>
-          <ixx>0.083</ixx>
-          <iyy>0.083</iyy>
-          <izz>0.083</izz>
-        </inertia>
+        <inertia><ixx>0.083</ixx><iyy>0.083</iyy><izz>0.083</izz></inertia>
       </inertial>
 
       <collision name='collision'>
-        <geometry>
-          <cylinder>
-            <radius>{radius}</radius>
-            <length>{height}</length>
-          </cylinder>
-        </geometry>
-
-        <category_bitmask>0x02</category_bitmask>
-
-        <surface>
-          <contact>
-            <collide_bitmask>0x01</collide_bitmask>
-          </contact>
-        </surface>
+        <geometry><cylinder><radius>{radius}</radius><length>{height}</length></cylinder></geometry>
       </collision>
-
       <visual name='visual'>
-        <geometry>
-          <cylinder>
-            <radius>{radius}</radius>
-            <length>{height}</length>
-          </cylinder>
-        </geometry>
-        <material>
-          <ambient>0.7 0.1 0.1 1</ambient>
-          <diffuse>0.7 0.1 0.1 1</diffuse>
-        </material>
+        <geometry><cylinder><radius>{radius}</radius><length>{height}</length></cylinder></geometry>
       </visual>
-
     </link>
-    
-  <plugin name="planar_move" filename="libgazebo_ros_planar_move.so">
-    <ros>
-      <namespace>/{name}</namespace>
-    </ros>
-    <bodyName>link</bodyName>
-    <commandTopic>cmd_vel</commandTopic>
-    <odometryTopic>odom</odometryTopic>
-    <odometryFrame>odom</odometryFrame>
-    <robotBaseFrame>base_link</robotBaseFrame>
-  </plugin>
+
+    <plugin name="planar_move" filename="libgazebo_ros_planar_move.so">
+      <ros>
+        <namespace>/{name}</namespace>
+      </ros>
+      <bodyName>{name}_link</bodyName>
+      <update_rate>50.0</update_rate>
+      
+      
+      <odometryFrame>{name}/odom</odometryFrame>
+      <robot_base_frame>{name}_link</robot_base_frame>
+      
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+    </plugin>
   </model>
 </sdf>
 """
-
+#<odometry_frame>world</odometry_frame>
 class CylinderSpawner(Node):
     def __init__(self, positions, radius=0.2, height=1.0):
         super().__init__('cylinder_spawner')
@@ -80,7 +56,7 @@ class CylinderSpawner(Node):
 
         # Loop over each (x,y) in the provided list
         for idx, (x, y) in enumerate(positions):
-            model_name = f'cylinder_{idx}'
+            model_name = f'obstacle_{idx}'
             sdf = CYLINDER_SDF.format(name=model_name, radius=radius, height=height)
 
             # Fill out the request
