@@ -13,18 +13,18 @@ goal_tolerance: 0.1   # teminate if the robot is within this distance to goal
 horizon_length: 12
 mppi_num_rollouts: 200
 pose_lim:               # [xmin,ymin],[xmax,ymax]
-  - [-5, -5]
-  - [5,  5]
+  - [-4, -4]
+  - [4,  4]
 boundary_eps: 1e-3
-obs_cmd_noise:  0.1
+obs_cmd_noise_std_dev:  0.3
 goal_rand_change: 80
-obs_sim_dt: 0.02
+obs_sim_dt: 0.025
 obs_v_min: -0.3
 obs_v_max: 0.3
 obs_goal_threshold: 0.08
 time_horizon: 10
 time_horizon_obst: 5
-max_neighbours: 7
+max_neighbours: 8
 neighbor_dist: 2
 obs_array:
   - [2.0,  0.0]
@@ -34,12 +34,12 @@ obs_array:
   - [2.0, -2.0]
   - [2.0,  2.0]
   - [-2.0, -2.0]
-  # - [-1.0, +2.0]
+  - [-1.0, +2.0]
   # - [2.0,1.0]
   # - [1.0,2.0]
   # - [-2.0,1.0]
   # - [-2.0,-1.0]
-num_obs: 7          # number of obstacles
+num_obs: 8          # number of obstacles
 dim_euclid: 2
 
 noise_std_dev: 0.05 # per‐step noise standard deviation

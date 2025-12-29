@@ -70,8 +70,7 @@ public:
             odom_callback(msg, name);
           });
 
-      samplers_[name] =
-        std::make_shared<GaussianNoiseSampler>(
+      samplers_[name] = std::make_shared<GaussianNoiseSampler>(
           obs_cmd_noise_std_dev_, 100 + i);
     }
     
@@ -109,6 +108,10 @@ private:
     }
   }
 
+  void rvo_callback()
+  {
+
+  }
   /* -------- Control Loop -------- */
 
   void control_loop()
@@ -119,11 +122,11 @@ private:
     // compute the speed
     // publish the speed
     // also check if its near the boundary then set a new goal
+    std::pair<float,float> noise ;
     for (auto & [name, state] : obs_states_)
     {
-
-      auto noise = samplers_[name]->sample();
-      mRVO->setPreferredVelocitiesbyName(name,RVO::Vector2(0.0,0.0)); //RVO::Vector2(noise.first, noise.second)
+      noise = samplers_[name]->sample();
+      mRVO->setPreferredVelocitiesbyName(name,RVO::Vector2(0.0,0.0)); 
       if(mRVO->isAgentArrived(name))
       {
         std::string modelDyn = "default";
@@ -135,9 +138,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<RVO::Vector2>> new_velocities = mRVO->stepCenteralised();
     for(auto & [name, speed] : new_velocities)
     {
-      
-      auto vx = speed->x();
-      auto vy = speed->y();
+      //RVO::Vector2(noise.first, noise.second)
+      auto vx = speed->x() + noise.first;
+      auto vy = speed->y() + noise.second ;
       geometry_msgs::msg::Twist cmd;
       // vx = std::clamp(vx, obs_v_min_, obs_v_max_);
       // vy = std::clamp(vy, obs_v_min_, obs_v_max_);
@@ -155,7 +158,7 @@ private:
 
     dt_ = cfg["obs_sim_dt"].as<double>();
     obs_r_ = cfg["obs_r"].as<double>();
-    obs_cmd_noise_std_dev_ = cfg["obs_cmd_noise"].as<double>();
+    obs_cmd_noise_std_dev_ = cfg["obs_cmd_noise_std_dev"].as<double>();
     boundary_eps_ = cfg["boundary_eps"].as<double>();
     obs_v_min_ = cfg["obs_v_min"].as<double>();
     obs_v_max_ = cfg["obs_v_max"].as<double>();

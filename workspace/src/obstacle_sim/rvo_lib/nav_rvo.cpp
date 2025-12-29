@@ -27,7 +27,7 @@ void RVOPlanner::setupScenario(
     float timeHorizonObst,
     float radius,
     float maxSpeed,
-    const std::vector<double>& limitGoal  ,  float goalThreshold
+    const std::vector<double>& limitGoal  ,  float goalThreshold , float randGoalChangeThreshold
 )
 {
     if (limitGoal.size() < 4) {
@@ -43,6 +43,7 @@ void RVOPlanner::setupScenario(
         maxSpeed
     );
     mGoalThreshold = goalThreshold;
+    mRandThresholdPercentage = randGoalChangeThreshold;
     const double minX = limitGoal[0];
     const double maxX = limitGoal[1];
     const double minY = limitGoal[2];
